@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "graphscribe"
+version = "0.0.1"
+description = "A line chart that explains itself and teaches you to read it. Own renderer, NumPy only."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+keywords = ["visualization", "line-chart", "time-series", "education", "explainable"]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Intended Audience :: Education",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Visualization",
+  "Topic :: Education",
+]
+dependencies = ["numpy>=1.22"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.5", "build", "twine", "pip-audit"]
+
+[project.urls]
+Homepage = "https://github.com/YOUR_USERNAME/graphscribe"
+Issues = "https://github.com/YOUR_USERNAME/graphscribe/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/graphscribe"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
