@@ -2,98 +2,138 @@
 
 A line chart that explains itself.
 
-You give it numbers. It draws the chart, writes a headline, points at the important things on the
-picture, and teaches you how to read it. It works the same from 5 points to 50 million.
+[![PyPI](https://img.shields.io/pypi/v/graphscribe)](https://pypi.org/project/graphscribe/)
+[![Python](https://img.shields.io/pypi/pyversions/graphscribe)](https://pypi.org/project/graphscribe/)
+[![CI](https://github.com/mishraxharshit/graphscribe/actions/workflows/ci.yml/badge.svg)](https://github.com/mishraxharshit/graphscribe/actions/workflows/ci.yml)
+[![License](https://img.shields.io/pypi/l/graphscribe)](LICENSE)
 
-![12 months of sales: every value written on the chart](docs/img/small.svg)
+![Monthly sales chart with every value labelled](docs/img/small.svg)
 
-## Why one chart only
+graphscribe draws a line chart from a list of numbers and describes what the data shows: a
+one-line headline, the overall trend, extreme values, and the highest and lowest points. The
+findings are written in plain English and marked directly on the chart. Charts are drawn by
+graphscribe's own SVG renderer. The only dependency is NumPy.
 
-I want visualization to be so simple that someone who knows nothing about data can still understand
-it. That is a big goal, so I am starting with one graph and going as deep as I can before adding
-the next. The line chart is the right first one: it covers a tiny list of monthly sales and a
-sensor that logs ten million readings, and a beginner meets it on day one.
+The same call works for twelve monthly values and for tens of millions of sensor readings.
 
-The idea underneath: most libraries draw a picture and leave you alone with it. graphscribe also
-tells you what you are looking at, the way a good teacher would, and it does that on the chart
-itself, not in a paragraph somewhere else.
-
-```python
-import graphscribe as gs
-
-chart = gs.line(sales, x=months, title="Monthly sales")
-
-chart                    # in Jupyter: the chart, the explanation and a lesson
-print(chart.explain())   # what the data says, in plain English
-print(chart.teach())     # how to read a line chart
-chart.show()             # opens in your browser
-chart.save("sales.svg")  # or "sales.html" (chart + explanation + lesson)
-```
-
-## What it does
-
-- **Writes its own headline.** "Rising steadily, with 1 extreme value."
-- **Points at what matters.** A ring around a strange value, a dashed trend line, the highest and
-  lowest point. No hunting.
-- **Adapts to the size of your data.** With 12 points every value is written on the chart. With
-  730 you get the shape and the one odd day. With 10 million you get the same clean chart.
-- **Understands dates.** Axis labels land on month and year starts, not random days.
-- **Never hides a spike.** For every pixel-wide slice of data it keeps the highest and lowest
-  value. All the statistics use every single point.
-- **Its own renderer.** No matplotlib or any plotting library underneath. The only dependency is
-  NumPy. Output is SVG.
-
-![730 days of visitors with one strange day](docs/img/medium.svg)
-
-## Test it from small to big
-
-`python benchmarks/bench_line.py` runs this on your machine. Every row plants one spike and checks
-that graphscribe finds it. These numbers are from a small cloud machine (4 GB RAM):
-
-| Points | Load | Explain | Draw | Total | SVG size | Peak memory | Spike found |
-|---:|---:|---:|---:|---:|---:|---:|:---:|
-| 1,000 | 0.000 s | 0.010 s | 0.002 s | 0.012 s | 28 KB | 39 MB | yes |
-| 10,000 | 0.000 s | 0.001 s | 0.003 s | 0.004 s | 38 KB | 39 MB | yes |
-| 100,000 | 0.000 s | 0.006 s | 0.002 s | 0.009 s | 38 KB | 43 MB | yes |
-| 1,000,000 | 0.004 s | 0.053 s | 0.003 s | 0.060 s | 38 KB | 79 MB | yes |
-| 10,000,000 | 0.077 s | 0.783 s | 0.029 s | 0.889 s | 39 KB | 375 MB | yes |
-| 50,000,000 | 0.268 s | 2.587 s | 0.150 s | 3.005 s | 39 KB | 1,660 MB | yes |
-
-![10 million sensor readings, same code](docs/img/big.svg)
-
-## Honest limits (v0.0.1)
-
-- **Memory is the real limit.** It uses about 33 bytes per point, so 100 million points needs
-  about 3.5 GB. Reading data in chunks instead of all at once is the first thing to fix.
-- **One series per chart.** No multiple lines yet.
-- **Missing values are skipped.** The line joins across them. It should show a gap instead.
-- **SVG and HTML only.** No PNG yet.
-- **Not interactive.** No zoom or hover yet.
-- **Explanations are basic.** Trend, extreme values, highest and lowest. A good statistician or
-  teacher could make this much better, and that is exactly what I am looking for.
-
-## Where this goes next
-
-Going deeper on the line chart before any new chart type:
-
-1. Multiple lines, with automatic "which one changed most" explanation.
-2. Gaps for missing data, and detecting repeating patterns (daily, weekly, yearly).
-3. Reading data in chunks, so memory stays small for any size.
-4. PNG export from a pure-NumPy encoder.
-5. Zoom: re-draw the detail of any region you select.
-
-## Install
-
-Not on PyPI yet. For now:
+## Installation
 
 ```bash
-pip install git+https://github.com/YOUR_USERNAME/graphscribe
+pip install graphscribe
 ```
 
-## Help build it
+Python 3.10 or newer is required.
 
-The easiest first contribution is one new insight rule: one small function in one file that says
-something useful about a line chart in plain English. Read [CONTRIBUTING.md](CONTRIBUTING.md).
+## Quick start
+
+```python
+import numpy as np
+import graphscribe as gs
+
+months = np.arange("2025-01", "2026-01", dtype="datetime64[M]")
+sales = [112, 118, 125, 123, 131, 140, 138, 150, 149, 162, 171, 168]
+
+chart = gs.line(sales, x=months, title="Monthly sales", y_label="sales")
+print(chart.explain())
+chart.save("sales.svg")
+```
+
+Output of `explain()`:
+
+```
+WHAT YOU ARE LOOKING AT
+  A line chart of 'sales' with 12 points. Your values come in order, so a line shows how they change from one point to the next.
+
+WHAT THE DATA SAYS
+  - There is a strong upward trend. The overall line rises from about 111.2 to 170.2. A straight line explains about 97% of the ups and downs (R-squared = 0.97).
+  - The highest value is 171 at 2025-11-01. The lowest is 112 at 2025-01-01.
+  - No unusual values (outliers) were found.
+  - There are 12 points. sales ranges from 112 to 171. The average is 140.6 and the middle value (median) is 139.
+```
+
+In Jupyter, evaluating `chart` on its own displays the chart, the explanation and a short lesson on
+how to read a line chart.
+
+## Usage
+
+```python
+chart = gs.line(y, x=None, *, title="", x_label="", y_label="")
+```
+
+| Method | Returns |
+|---|---|
+| `chart.explain()` | The findings as plain-English text |
+| `chart.headline()` | A one-line summary, for example `Rising steadily, with 1 extreme value` |
+| `chart.teach()` | A short guide to reading a line chart, with a glossary |
+| `chart.svg(annotate=True)` | The chart as an SVG string. `annotate=False` draws the plain line only |
+| `chart.save(path)` | Writes `.svg` (chart) or `.html` (chart, explanation and guide) |
+| `chart.show()` | Opens the chart and explanation in a browser |
+
+**Input.** `y` can be a list, a NumPy array or a pandas Series. If `y` is a Series, its index is used
+as `x` when it holds numbers or dates. `x` can be numbers or `datetime64` values. Missing values
+(NaN) are skipped and reported in the explanation. Unsorted `x` values are sorted.
+
+## Analysis
+
+| Finding | Method |
+|---|---|
+| Trend | Least-squares line. Reported as strong, moderate or weak from R-squared, with start and end values |
+| Extreme values | Points more than three interquartile ranges from the trend line. Marked on the chart |
+| Unusual values | Points between 1.5 and 3 interquartile ranges from the trend line. Reported, not marked |
+| Highest and lowest | Marked on the chart. With 12 or fewer points every value is labelled instead |
+| Summary | Count, range, mean and median |
+
+All statistics are computed from every point, not from the drawn subset.
+
+## Large data
+
+A screen is roughly a thousand pixels wide, so drawing every point of a large series adds nothing.
+For each horizontal pixel column, graphscribe keeps the lowest and highest value and draws those.
+A single spike therefore remains visible at any size. The SVG stays at about 40 KB.
+
+`benchmarks/bench_line.py` measures this. Each run contains one planted spike, and the last column
+shows whether it was found. Times are in seconds for the whole job (load, explain, draw) on a
+small cloud machine with 4 GB of RAM.
+
+| Points | Load | Explain | Draw | Total | Peak memory | Spike found |
+|---:|---:|---:|---:|---:|---:|:---:|
+| 1,000 | 0.001 | 0.010 | 0.001 | 0.012 | 38 MB | yes |
+| 10,000 | 0.000 | 0.001 | 0.001 | 0.002 | 39 MB | yes |
+| 100,000 | 0.000 | 0.006 | 0.001 | 0.008 | 43 MB | yes |
+| 1,000,000 | 0.005 | 0.053 | 0.003 | 0.062 | 77 MB | yes |
+| 10,000,000 | 0.063 | 0.705 | 0.039 | 0.806 | 373 MB | yes |
+| 50,000,000 | 0.237 | 2.457 | 0.145 | 2.839 | 1,660 MB | yes |
+
+![Ten million readings drawn as a single chart](docs/img/big.svg)
+
+## Limitations
+
+- One series per chart.
+- Missing values are skipped and the line is drawn across the gap. A visible gap is planned.
+- Output is SVG or HTML. There is no PNG export and no interactivity (zoom, hover).
+- Memory use is about 33 bytes per point, because the full series is held in memory. Around
+  100 million points need roughly 3.5 GB.
+- Explanations are in English only.
+- The analysis is intentionally basic. It covers trend, extreme values and range. Seasonality and
+  change points are not detected yet.
+
+## Roadmap
+
+1. Multiple series, with a comparison of which one changed most.
+2. Gaps for missing data, and detection of repeating patterns (daily, weekly, yearly).
+3. Chunked reading, so memory stays flat regardless of data size.
+4. PNG export.
+5. Zoom that redraws the detail of a selected region.
+
+Other chart types will follow once the line chart is complete.
+
+## Contributing
+
+The most direct way to contribute is a new insight rule: one function in one file that reports
+something useful about a line chart in plain language. See [CONTRIBUTING.md](CONTRIBUTING.md) for
+setup and conventions. Bug reports with a small example of the data are very welcome.
+
+Security issues should be reported privately as described in [SECURITY.md](SECURITY.md).
 
 ## License
 
