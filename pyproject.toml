@@ -7,7 +7,7 @@ name = "graphscribe"
 version = "0.0.1"
 description = "A line chart that explains itself and teaches you to read it. Own renderer, NumPy only."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 keywords = ["visualization", "line-chart", "time-series", "education", "explainable"]

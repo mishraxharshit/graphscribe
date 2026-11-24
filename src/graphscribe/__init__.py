@@ -1,6 +1,6 @@
-"""graphscribe: a line chart that explains itself, from 5 points to 100 million."""
+"""Importing a module here registers its rule. Add new rules as new files."""
 
-from .core import LineChart, line
+from . import extremes, outliers, summary, trend  # noqa: F401
+from .base import Data, Insight, Mark, fmt, register_insight, run_all
 
-__version__ = "0.0.1"
-__all__ = ["LineChart", "__version__", "line"]
+__all__ = ["Data", "Insight", "Mark", "fmt", "register_insight", "run_all"]

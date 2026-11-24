@@ -101,4 +101,5 @@ def time_ticks(lo: float, hi: float, target: int = 6):
     ys = np.arange(-(-y_lo // step) * step, y_hi + 1, step)
     stamps = (ys - 1970).astype("datetime64[Y]").astype("datetime64[s]").astype(np.int64)
     secs = keep(stamps)
-    return secs, [str(int(y)) for y, s in zip(ys, stamps) if lo - 1e-6 <= s <= hi + 1e-6]
+    inside = [lo - 1e-6 <= s <= hi + 1e-6 for s in stamps]
+    return secs, [str(int(y)) for y, ok in zip(ys, inside, strict=True) if ok]

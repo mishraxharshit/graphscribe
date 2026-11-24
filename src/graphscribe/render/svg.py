@@ -105,22 +105,22 @@ def render_line(x, y, *, title="", x_label="", y_label="", x_is_time=False, head
                     f'stroke="{GRID}"/>')
         body.append(_text(left - 10, py + 4, format_number(t, ystep), 12, MUTED, "end"))
     xt, xlabels = _x_ticks(xlo, xhi, x_is_time)
-    for t, lab in zip(xt, xlabels):
+    for t, lab in zip(xt, xlabels, strict=True):
         body.append(_text(float(mx(t)), top + ph + 22, lab, 12, MUTED, "middle"))
 
     xs, ys = minmax_decimate(x, y, pw)
     px, py = mx(xs), my(ys)
-    pts = " L".join(f"{a:.1f},{b:.1f}" for a, b in zip(px, py))
+    pts = " L".join(f"{a:.1f},{b:.1f}" for a, b in zip(px, py, strict=True))
     base = top + ph
     body.append(f'<path d="M{pts} L{px[-1]:.1f},{base} L{px[0]:.1f},{base} Z" '
                 f'fill="{BLUE}" fill-opacity="0.07"/>')
     body.append(f'<path d="M{pts}" fill="none" stroke="{BLUE}" stroke-width="2" '
                 f'stroke-linejoin="round" stroke-linecap="round"/>')
     if xs.size <= 60:
-        for a, b in zip(px, py):
+        for a, b in zip(px, py, strict=True):
             body.append(f'<circle cx="{a:.1f}" cy="{b:.1f}" r="3.2" fill="{BLUE}"/>')
     if xs.size <= 12:  # tiny data: write every value on the chart
-        for a, b, v in zip(px, py, ys):
+        for a, b, v in zip(px, py, ys, strict=True):
             body.append(_text(a, b - 11, fmt(v), 12, INK, "middle", 600, halo=True))
     body.append(f'<line x1="{left}" x2="{left + pw}" y1="{base}" y2="{base}" '
                 f'stroke="{INK}" stroke-width="1.4"/>')
