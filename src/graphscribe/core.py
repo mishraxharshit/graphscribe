@@ -13,6 +13,16 @@ from .insights import Data, run_all
 from .render.svg import render_line
 
 
+def _in_notebook() -> bool:
+    """True inside Jupyter, VS Code notebooks and Colab (not in a plain terminal)."""
+    try:
+        from IPython import get_ipython
+    except ImportError:
+        return False
+    shell = get_ipython()
+    return shell is not None and shell.__class__.__name__ == "ZMQInteractiveShell"
+
+
 class Explanation(str):
     """A string that prints nicely in a terminal or notebook."""
 
@@ -145,7 +155,8 @@ class LineChart:
         return self.html()
 
     def __repr__(self) -> str:
-        return f"<graphscribe.LineChart {self.y.size:,} points>"
+        return (f"<graphscribe.LineChart {self.y.size:,} points>  "
+                ".show() to view, .explain() to read, .save('chart.svg') to keep")
 
     def save(self, path: str) -> "LineChart":
         """Save as .svg (chart only) or .html (chart + explanation + lesson)."""
@@ -161,11 +172,23 @@ class LineChart:
         return self
 
     def show(self) -> "LineChart":
-        """Open the chart with its explanation in your web browser."""
+        """Display the chart with its explanation.
+
+        In Jupyter it appears right below the cell. In a script it opens in your web browser.
+        If no browser can be opened (a remote server, for example) the file is saved and its
+        path is printed, so something always happens.
+        """
+        if _in_notebook():
+            from IPython.display import HTML, display
+
+            display(HTML(self.html()))
+            return self
         fd, path = tempfile.mkstemp(suffix=".html", prefix="graphscribe_")
         os.close(fd)
         self.save(path)
-        webbrowser.open("file://" + path)
+        if not webbrowser.open("file://" + path):
+            print(f"Could not open a browser here. The chart was saved to:\n  {path}\n"
+                  "Open that file in any browser, or use .save('chart.svg') to choose the name.")
         return self
 
 

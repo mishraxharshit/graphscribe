@@ -54,6 +54,20 @@ WHAT THE DATA SAYS
 In Jupyter, evaluating `chart` on its own displays the chart, the explanation and a short lesson on
 how to read a line chart.
 
+## Using it like matplotlib
+
+| You want | matplotlib | graphscribe |
+|---|---|---|
+| Draw and view in a script | `plt.plot(y)` then `plt.show()` | `gs.line(y).show()` |
+| View in Jupyter | `plt.plot(y)` | `gs.line(y)` on the last line of a cell |
+| Save to a file | `plt.savefig("a.png")` | `gs.line(y).save("a.svg")` |
+| Read what it shows | not available | `print(gs.line(y).explain())` |
+
+`show()` opens the chart in your web browser. On a machine without a browser, such as a remote
+server, it saves the file and prints its path instead. In Jupyter it displays the chart inline.
+A line of code that only creates a chart, such as `gs.line(y)` in a script, draws nothing until
+you call `show()`, `save()` or `explain()`.
+
 ## Usage
 
 ```python

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "graphscribe"
-version = "0.0.1"
+version = "0.0.2"
 description = "A line chart that explains itself and teaches you to read it. Own renderer, NumPy only."
 readme = "README.md"
 requires-python = ">=3.10"
