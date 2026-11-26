@@ -129,3 +129,40 @@ def test_save_svg_and_html(tmp_path):
 
 def test_teach_explains_how_to_read_it():
     assert "HOW TO READ A LINE CHART" in gs.line([1, 2, 3]).teach()
+
+
+# ---- show() must never fail silently ----------------------------------------------------
+def test_show_prints_the_path_when_no_browser(monkeypatch, capsys):
+    import webbrowser
+
+    monkeypatch.setattr(webbrowser, "open", lambda url: False)
+    gs.line([1, 2, 3, 5, 4]).show()
+    out = capsys.readouterr().out
+    assert "saved to" in out and ".html" in out
+
+
+def test_show_opens_a_browser_quietly_when_possible(monkeypatch, capsys):
+    import webbrowser
+
+    opened = []
+    monkeypatch.setattr(webbrowser, "open", lambda url: opened.append(url) or True)
+    gs.line([1, 2, 3, 5, 4]).show()
+    assert opened and opened[0].startswith("file://") and capsys.readouterr().out == ""
+
+
+def test_show_displays_inline_in_a_notebook(monkeypatch):
+    import sys
+    import types
+
+    shown = []
+    fake = types.ModuleType("IPython.display")
+    fake.HTML = lambda html: ("HTML", html)
+    fake.display = lambda obj: shown.append(obj)
+    monkeypatch.setitem(sys.modules, "IPython.display", fake)
+    monkeypatch.setattr("graphscribe.core._in_notebook", lambda: True)
+    gs.line([1, 2, 3, 5, 4]).show()
+    assert shown and shown[0][0] == "HTML" and "<svg" in shown[0][1]
+
+
+def test_repr_tells_a_beginner_what_to_do():
+    assert ".show()" in repr(gs.line([1, 2, 3]))
